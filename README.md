@@ -7,6 +7,8 @@
 
 ## 项目结构
 
+项目的基础结构如下文件树所示
+
     ├── demo      ： 测试
     │   ├── CMakeLists.txt
     │   └── TrackingDemo.cpp
@@ -30,7 +32,7 @@
 
 通过以下命令构建demo
 
-    $  cd path/to/trakcing
+    $  cd path/to/tracking
     $  cd demo
     $  mkdir build && cd build
     $  cmake ..
