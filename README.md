@@ -1,6 +1,6 @@
-# Tracker
----
+# Tracking
 
+主要实现了基于Sort的MOT的Tracking模块
 ## 介绍
     
 &emsp; 本仓库主要实现了基于Sort的MOT的Tracking模块 ,并留下MOT的通用接口，待实现DeepSort等常用MOT算法
@@ -26,9 +26,12 @@
 
 2. OpenCV >=4.4.0
 
-## Build
+## Demo
 
-    $  cd ./demo 
+通过以下命令构建demo
+
+    $  cd path/to/trakcing
+    $  cd demo
     $  mkdir build && cd build
     $  cmake ..
     $  make -j
