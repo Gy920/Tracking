@@ -105,10 +105,11 @@ namespace Track
         {
             if (assignment[i] == -1) // pass over invalid values
                 continue;
-            if (1 - iouMatrix[i][assignment[i]] < IOU_THRESHOLD)
+            if ((1 - iouMatrix[i][assignment[i]]) < IOU_THRESHOLD)
             {
                 unmatchedTrajectories.insert(i);
                 unmatchedDetections.insert(assignment[i]);
+                // std::cout << "traker iou faied  : " << 1 - iouMatrix[i][assignment[i]] << std::endl;
             }
             else
                 matchedPairs.push_back(cv::Point(i, assignment[i]));
@@ -125,6 +126,7 @@ namespace Track
         {
             BatchTracker tracker = BatchTracker(detect_boxs[umd]);
             this->trackers_.push_back(tracker);
+            // std::cout << "unmatch add trakcer " << std::endl;
         }
         return true;
     }
@@ -133,15 +135,21 @@ namespace Track
     {
         this->tracking_result_.clear();
         this->predict_boxs_.clear();
-
         // init tracker
         if (trackers_.empty())
         {
+            int idex = 0;
             for (auto box : detect_boxs)
             {
+
                 BatchTracker tracker = BatchTracker(box);
                 trackers_.push_back(tracker);
+                TrackingBox res;
+                res.box = box;
+                res.id = idex++;
+                tracking_result_.push_back(res);
             }
+
             return true;
         }
 
@@ -160,16 +168,35 @@ namespace Track
                 it = trackers_.erase(it);
             }
         }
+
+        cv::Mat frames = frame.clone();
+        std::cout << " tracker " << trackers_.size() << std::endl;
+        ;
+        int idex = 0;
+        for (auto a : trackers_)
+        {
+            auto box = a.getLastRect();
+            /*Debug
+                // std::cout<<"[Debug]: Trakcers "<<idex<<" "<<b.x<<" "<<b.y<<" "<<b.width<<" "<<b.height<<" "<<std::endl;
+                // std::cout<<"[Debug]: Trackers predict "<<" idex : "<<idex<<" "<<box<<std::endl;
+                // idex++;
+            */
+        }
         // get match
         if (!match(frame, detect_boxs))
         {
-            this->error_message_="Match failed";
+            this->error_message_ = "Match failed";
             return false;
         }
         // get output
 
         for (auto it = trackers_.begin(); it != trackers_.end();)
         {
+            // remove dead tracklet
+            if (it != trackers_.end() && (*it).since_update_age > 3)
+            {
+                it = trackers_.erase(it);
+            }
             if (((*it).since_update_age < MAX_AGE) &&
                 ((*it).m_hit_streak >= MIN_HITS))
             {
@@ -181,11 +208,12 @@ namespace Track
             }
             else
             {
+                /*Debug
+                // std::cout<<"[Debug]: error : update age "<<(*it).since_update_age<<
+                //             "  hit_streak "<<(*it).m_hit_streak<<std::endl;
+                */
                 it++;
             }
-            // remove dead tracklet
-            if (it != trackers_.end() && (*it).since_update_age > 6)
-                it = trackers_.erase(it);
         }
 
         return true;

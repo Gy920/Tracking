@@ -8,10 +8,10 @@
 #include <opencv2/highgui/highgui.hpp>
 
 /*Const Setting*/
-#define SORT_DBL_EPSILON 0.4
-#define IOU_THRESHOLD 0.3
-#define MAX_AGE 1
-#define MIN_HITS 3
+#define SORT_DBL_EPSILON 0.1
+#define IOU_THRESHOLD 0.1
+#define MAX_AGE 2
+#define MIN_HITS 1
 /**/
 
 namespace Track
@@ -45,9 +45,9 @@ namespace Track
     {
         float inter_area = (box1 & box2).area();
         float union_area = box1.area() + box2.area() - inter_area;
-
+        
         if (union_area < SORT_DBL_EPSILON)
-            return 0;
+            return 0.1;
         return (double)(inter_area / union_area);
     }
 

@@ -10,6 +10,10 @@ namespace Track
         last_rect = rect;
         id = tracker_count;
         tracker_count += 1;
+        since_update_age = 0;
+        m_hits = 0;
+        m_hit_streak = 0;
+        m_age = 0;
     }
 
     cv::Rect2d BatchTracker::getLastRect()
@@ -46,19 +50,18 @@ namespace Track
 
     cv::Rect2d BatchTracker::predict(const double d_t)
     {
-        since_update_age += 1;
-        m_age += 1;
 
         if (since_update_age > 0)
             m_hit_streak = 0;
 
-        if (last_rect.height == 0 || last_rect == cv::Rect2d())
-            return cv::Rect2d();
+        since_update_age += 1;
+        m_age += 1;
+        // if (last_rect.height == 0 || last_rect == cv::Rect2d())
+        //     return cv::Rect2d();
 
         // set
         kf.transitionMatrix = (cv::Mat_<float>(7, 7)
-                                   << 1,
-                               0, 0, 0, d_t, 0, 0,
+                                   << 1,0, 0, 0, d_t, 0, 0,
                                0, 1, 0, 0, 0, d_t, 0,
                                0, 0, 1, 0, 0, 0, d_t,
                                0, 0, 0, 1, 0, 0, 0,
@@ -67,6 +70,7 @@ namespace Track
                                0, 0, 0, 0, 0, 0, 1);
 
         cv::Mat post_state = kf.predict();
+        // std::cout<<"post state "<<post_state.at<float>(0, 0)<<std::endl;
         cv::Rect2d predict_box = getRect(post_state.at<float>(0, 0), post_state.at<float>(1, 0), post_state.at<float>(2, 0), post_state.at<float>(3, 0));
         last_rect = predict_box;
         return predict_box;
@@ -79,7 +83,7 @@ namespace Track
         float x = (cx - w / 2);
         float y = (cy - h / 2);
 
-        return (cv::Rect2d(x, y, w, h) & cv::Rect2d(0, 0, w, h));
+        return cv::Rect2d(x, y, w, h);
     }
 
     cv::Rect2d BatchTracker::correct(cv::Rect2d &rect)
@@ -87,8 +91,6 @@ namespace Track
         since_update_age = 0;
         m_hits += 1;
         m_hit_streak += 1;
-        if (rect.height == 0 || rect == cv::Rect2d())
-            return cv::Rect2d();
 
         cv::Mat measurement = cv::Mat::zeros(4, 1, CV_32F);
         measurement.at<float>(0, 0) = rect.x + rect.width / 2;
