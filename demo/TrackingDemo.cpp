@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     cv::Mat frame;
     cap >> frame;
     cv::namedWindow("tracking_demo", cv::WINDOW_NORMAL);
-    std::cout << frame.cols << " " << frame.rows << std::endl;
+    std::cout <<"Img Size : "<< frame.cols << " " << frame.rows << std::endl;
     int idex = 0;
     std::vector<cv::Rect2d> detect_box;
     std::vector<Track::TrackingBox> update_box;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         {
             break;
         }
-        std::cout << idex << std::endl;
+        std::cout <<"Img idex : "<<idex << std::endl;
         //
         getDetectBox(idex, detect_box);
         //
